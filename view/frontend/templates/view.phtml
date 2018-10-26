@@ -1,0 +1,15 @@
+<?php
+/** @var  \Tutorial\Blog\Block\Post $block */
+/** @var  \Tutorial\Blog\Model\Post $post */
+$post = $block->getPost();
+?>
+
+<h1 class="blog-post-item-title"><?= $post->getTitle(); ?></h1>
+
+<div class="blog-post-item-content">
+    <?= $post->getContent(); ?>
+</div>
+
+<div class="blog-post-item-meta">
+    <strong><?php echo __('Created at:') ?></strong> <?= $post->getCreatedAt(); ?>
+</div>

@@ -1,0 +1,19 @@
+<?php /** @var \Tutorial\Blog\Block\Posts $block */?>
+<h1><?php echo __('Latest Blog Posts'); ?></h1>
+
+<ul class="blog-post-list">
+    <?php  /** @var \Tutorial\Blog\Block\Post $post */?>
+    <?php foreach ($block->getPosts() as $post): ?>
+    <li class="blog-post-list-item">
+        <h3 class="blog-post-item-title">
+            <a href="<?= $this->getUrl('*/view/index', ['id' => $post->getId()]); ?>"><?= $post->getTitle(); ?></a>
+        </h3>
+        <div class="blog-post-item-content">
+            <?= $post->getContent(); ?>
+        </div>
+        <div class="blog-post-item-meta">
+            <strong><?php echo __('Created at: '); ?></strong><?= $post->getCreatedAt(); ?>
+        </div>
+    </li>
+    <?php endforeach; ?>
+</ul>
