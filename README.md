@@ -26,6 +26,60 @@ Magento PHP 开发者需要快速学习如何在平台上构建我们的客户�
 
 ## 模块创建步骤
 
+设置我们模块的基本结构:
+
+    etc/module.xml
+    registration.php
+    composer.json
+    
+在根目录中，我们创建一个 `composer.json` 文件，它看起来像这样：
+
+```
+{
+    "name": "mandrills/magento2-tutorial",
+    "description": "A simple blog module for magento 2.2.6",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+        "OSL-3.0",
+        "AFL-3.0"
+    ],
+    "authors": [
+        {
+            "name": "Andy D Xing",
+            "email": "andydxing@objectivasoftware.com"
+        }
+    ],
+    "require": {
+        "php": "~7.1.*",
+        "magento/magento-composer-installer": "*"
+    },
+    "extra": {
+        "map": [
+            [
+                "*",
+                "Tutorial/Blog"
+            ]
+        ]
+    }
+}
+```
+Comoposer文件这里不解释太多，不太了解的同学请查看它的[官方文档](https://getcomposer.org/doc/00-intro.md)。这里主要说下文件里 *type* 和 *extra* 字段。
+
+`"type": "magento2-module"`  定义我们repo的类型为magento2模块
+
+`"extra": {
+   "map": [
+      [
+         "*",
+         "Tutorial/Blog"
+      ]
+   ]
+}` 定义composer如何安装这个模块。 翻译过来就是所有文件都应该在Tutorial/Blog文件夹中，这就意味着我们的模块将被安装到`app/code/Tutorial/Blog`。
+
+如果想了解更多有关Composer相关的文章，请访问[Alan Kent的博客](https://alankent.me/2014/08/03/creating-a-magento-2-composer-module/)。
+
+
 ### 基本模块设置
 
 ### 设置模型和基本模型
