@@ -34,12 +34,7 @@ class Router  implements \Magento\Framework\App\RouterInterface
     public function match(\Magento\Framework\App\RequestInterface $request)
     {
         $url_key = trim($request->getPathInfo(), '/blog/');
-
-        var_dump($url_key);
         $url_key = rtrim($url_key, '/');
-
-        var_dump($url_key);
-        exit;
 
         /** @var \Tutorial\Blog\Model\Post $post */
         $post = $this->postFactory->create();
