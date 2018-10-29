@@ -17,7 +17,7 @@ Magento PHP 开发者需要快速学习如何在平台上构建我们的客户�
 最终模块将是一个非常基本的博客，你将能够通过管理员创建博客文章，包括编辑和删除他们。然后从前端你将能够查看所有博客文章的列表，并能单独查看每个文章。这些操作能够涵盖构建 Magento 扩展的所有必要元素。
 
 1. [基本模块设置](#基本模块设置)
-2. [设置模型和基本模型](#设置模型和基本模型)
+2. [设置模型和资源模型](#设置模型和资源模型)
 3. [设置数据库和迁移](#设置数据库和迁移)
 4. [前端控制器、块、布局和试图](#前端控制器、块、布局和试图)
 5. [后台控制器、块、用户界面、布局和试图](#后台控制器、块、用户界面、布局和试图)
@@ -25,6 +25,9 @@ Magento PHP 开发者需要快速学习如何在平台上构建我们的客户�
 
 
 ## 模块创建步骤
+
+### 基本模块设置
+
 
 设置我们模块的基本结构:
 
@@ -79,10 +82,44 @@ Comoposer文件这里不解释太多，不太了解的同学请查看它的[官�
 
 如果想了解更多有关Composer相关的文章，请访问[Alan Kent的博客](https://alankent.me/2014/08/03/creating-a-magento-2-composer-module/)。
 
+首先你先创建etc/module.xml文件
 
-### 基本模块设置
+```
+<?xml version="1.0"?>
+    <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+        <module name="Tutorial_Blog" setup_version="1.0.0" />
+    </config>
+```
 
-### 设置模型和基本模型
+接着我们需要在模块的根目录中创建registration.php文件，Magento中使用它来注册模块。
+```
+<?php
+\Magento\Framework\Component\ComponentRegistrar::register(
+    \Magento\Framework\Component\ComponentRegistrar::MODULE,
+    'Tutorial_Blog',
+    __DIR__
+);
+```
+现在一个基本的模块已经形成，但是它在Magento中还不能运行。要使模块正常使用，就需要启用它并升级数据库，像这样：
+
+```
+bin/magento module:status # 展示每个模块的状态：关闭/开启
+bin/magento module:enable Tutorial_Blog # 开启Tutorial_Blog模块
+bin/magento setup:upgrade # 升级数据库，保存当前模块的版本以及需要安装的表
+bin/magento module:status # 确认当前模块状态
+```
+如果不使用composer安装的话，到项目下创建app/code目录（如果目录不存在需要创建），然后将代码复制到app/code/Tutorial/Blog目录结构中即可。
+
+> app
+>> code
+>>> Tutorial
+>>>> Blog
+>>>>> registration.php
+
+>>>>> etc
+>>>>>> module.xml
+
+### 设置模型和资源模型
 
 ### 设置数据库和迁移
 
