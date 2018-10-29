@@ -121,6 +121,492 @@ bin/magento module:status # 确认当前模块状态
 
 ### 设置模型和资源模型
 
+让我们进入今天的主题，知识点主要涵盖：
+- [x] 模型
+- [x] 资源模型
+
+Magento有很多自己的惯例，今天就开始慢慢涵盖进来，第一个就是使用PHP接口。博客模块只需要一个数据表就可以了，并且被命名为tutorial_blog_post，使用命名空间所以就不必担心冲突产生。 我们的模型就成为Post,所以在创建模型之前我们要创建一个接口，这个接口我们称之为数据接口。
+
+如果你要了解更多关于如何使用接口，可以移步至devdocs.magento.com查看Magento官方文档。
+
+- [服务合同](https://devdocs.magento.com/guides/v2.0/extension-dev-guide/service-contracts/service-contracts.html)
+
+- [服务合同-数据接口](https://devdocs.magento.com/guides/v2.2/extension-dev-guide/service-contracts/design-patterns.html#data-interfaces)
+
+在构建数据接口之前，先把博客数据表`post`使用的列罗列出来：
+
+- post_id - post表主键ID
+- url_key - 唯一 url_key,可以自定义创建post路由
+- title - post标题
+- content - post内容
+- created_at - 创建时间
+- updated_at - 更新时间
+- published_at - 发布时间
+- is_active - post是否开启标记
+
+现在我们开始创建`Api/Data/PostInterface`数据接口，代码如下：
+
+```
+<?php
+namespace Tutorial\Blog\Api\Data;
+interface PostInterface
+{
+    const POST_ID = 'post_id';
+    const URL_KEY = 'url_key';
+    const TITLE = 'title';
+    const CONTENT = 'content';
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+    const PUBLISHED_AT = 'published_at';
+    const IS_ACTIVE = 'is_active';
+
+    /**
+     * @return int|null
+     */
+    public function getId();
+
+    /**
+     * @return string
+     */
+    public function getUrlKey();
+
+    /**
+     * @return string|null
+     */
+    public function getTitle();
+
+    /**
+     * @return string|null
+     */
+    public function getContent();
+
+    /**
+     * @return string|null
+     */
+    public function getCreatedAt();
+
+    /**
+     * @return string|null
+     */
+    public function getUpdatedAt();
+
+    /**
+     * @return string|null
+     */
+    public function getPublishedAt();
+
+    /**
+     * @return boolean|null
+     */
+    public function isActive();
+
+    /**
+     * @param $id
+     * @return $this
+     */
+    public function setId($id);
+
+    /**
+     * @param string $url_key
+     * @return $this
+     */
+    public function setUrlKey($url_key);
+
+    /**
+     * @param string $title
+     * @return $this
+     */
+    public function setTitle($title);
+
+    /**
+     * @param string $content
+     * @return $this
+     */
+    public function setContent($content);
+
+    /**
+     * @param string $created_at
+     * @return $this
+     */
+    public function setCreatedAt($created_at);
+
+    /**
+     * @param string $updated_at
+     * @return $this
+     */
+    public function setUpdatedAt($updated_at);
+
+    /**
+     * @param string $published_at
+     * @return $this
+     */
+    public function setPublishedAt($published_at);
+
+    /**
+     * @param int|bool $is_active
+     * @return $this
+     */
+    public function setIsActive($is_active);
+
+}
+```
+这个接口定义了所有的getter和setter，这个以后和模型交互时使用。接着创建我们的模型Model/Post.php文件:
+
+```
+<?php
+namespace Tutorial\Blog\Model;
+
+use Tutorial\Blog\Api\Data\PostInterface;
+use Magento\Framework\DataObject\IdentityInterface;
+
+class Post extends \Magento\Framework\Model\AbstractModel implements PostInterface, IdentityInterface
+{
+    const STATUS_ENABLED = 1;
+    const STATUS_DISABLED = 0;
+
+    const CACHE_TAG = 'blog_post';
+
+    protected $_cacheTag = 'blog_post';
+
+    protected $_eventPrefix = 'blog_post';
+
+    protected function _construct()
+    {
+        $this->_init('Tutorial\Blog\Model\ResourceModel\Post');
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getIdentities()
+    {
+        return [self::CACHE_TAG . '_' . $this->getId()];
+    }
+
+    /**
+     * @param string $url_key
+     * @return boolean
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function checkUrlKey($url_key)
+    {
+        return $this->_getResource()->checkUrlKey($url_key);
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailableStatuses()
+    {
+        return [
+          self::STATUS_ENABLED => __('Enabled'),
+          self::STATUS_DISABLED => __('Disabled')
+        ];
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getId()
+    {
+        return $this->getData(self::POST_ID);
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrlKey()
+    {
+        return $this->getData(self::URL_KEY);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getTitle()
+    {
+        return $this->getData(self::TITLE);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getContent()
+    {
+        return $this->getData(self::CONTENT);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCreatedAt()
+    {
+        return $this->getData(self::CREATED_AT);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getUpdatedAt()
+    {
+        return $this->getData(self::UPDATED_AT);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getPublishedAt()
+    {
+        return $this->getData(self::PUBLISHED_AT);
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function isActive()
+    {
+        return $this->getData(self::IS_ACTIVE);
+    }
+
+    /**
+     * @param mixed $id
+     * @return PostInterface|Post
+     */
+    public function setId($id)
+    {
+        return $this->setData(self::POST_ID, $id);
+    }
+
+    /**
+     * @param string $url_key
+     * @return PostInterface|Post
+     */
+    public function setUrlKey($url_key)
+    {
+        return $this->setData(self::URL_KEY, $url_key);
+    }
+
+    /**
+     * @param string $title
+     * @return PostInterface|Post
+     */
+    public function setTitle($title)
+    {
+        return $this->setData(self::TITLE, $title);
+    }
+
+    /**
+     * @param string $content
+     * @return mixed|PostInterface
+     */
+    public function setContent($content)
+    {
+        return $this->setData(self::CONTENT, $content);
+    }
+
+    /**
+     * @param string $created_at
+     * @return PostInterface|Post
+     */
+    public function setCreatedAt($created_at)
+    {
+        return $this->setData(self::CREATED_AT, $created_at);
+    }
+
+    /**
+     * @param string $updated_at
+     * @return PostInterface|Post
+     */
+    public function setUpdatedAt($updated_at)
+    {
+        return $this->setData(self::UPDATED_AT, $updated_at);
+    }
+
+    /**
+     * @param string $published_at
+     * @return PostInterface|Post
+     */
+    public function setPublishedAt($published_at)
+    {
+        return $this->setData(self::PUBLISHED_AT, $published_at);
+    }
+
+    /**
+     * @param bool|int $is_active
+     * @return PostInterface|Post
+     */
+    public function setIsActive($is_active)
+    {
+        return $this->setData(self::IS_ACTIVE, $is_active);
+    }
+
+}
+```
+正如你看到的一样，Post模型实现了PostInterface中所有的方法,同时我们也实现了第二个接口`Magento\Framework\DataObject\IdentityInterface`。这个接口被用于模型创建更新删除操作后缓存的刷新，以及在前端模型的渲染。只需要实现`getIdentities()`方法即可，这将返回这个模型的唯一ID号，这就是该模型的缓存。
+
+现在是时候创建我们的资源模型`Model/ResourceModel/Post.php`了。
+
+```
+<?php
+namespace Tutorial\Blog\Model\ResourceModel;
+
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+
+class Post extends AbstractDb
+{
+    protected $date;
+
+    public function __construct(
+        \Magento\Framework\Model\ResourceModel\Db\Context $context,
+        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        ?string $connectionName = null)
+    {
+        $this->date = $date;
+        parent::__construct($context, $connectionName);
+    }
+
+    protected function _construct()
+    {
+        $this->_init('tutorial_blog_post','post_id');
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @return $this
+     * @throws LocalizedException
+     */
+    protected function _beforeSave(\Magento\Framework\Model\AbstractModel $object)
+    {
+        if (!$this->isValidPostUrlKey($object)) {
+            throw new LocalizedException(__('The post URL key contains capital letters or disallowed symbols.'));
+        }
+        if ($this->isNumericPostUrlKey($object)) {
+            throw new LocalizedException(__('The post URL key cannot be made of only numbers.'));
+        }
+
+        if ($object->isObjectNew() && !$object->hasCreatedAt()) {
+            $object->setCreatedAt($this->date->gmtDate());
+        }
+
+        $object->setUpdatedAt($this->date->gmtDate());
+
+        return parent::_beforeSave($object);
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @param mixed $value
+     * @param string $field
+     * @return $this
+     */
+    public function load(\Magento\Framework\Model\AbstractModel $object, $value, $field = null)
+    {
+        if (!is_numeric($value) && is_null($field)) {
+            $field = 'url_key';
+        }
+
+        return parent::load($object, $value, $field);
+    }
+
+    /**
+     * @param string $field
+     * @param mixed $value
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @return \Magento\Framework\DB\Select
+     */
+    protected function _getLoadSelect($field, $value, $object)
+    {
+        $select = parent::_getLoadSelect($field, $value, $object);
+
+        if ($object->getStoreId()) {
+
+            $select->where(
+                'is_active = ?',
+                1
+            )->limit(
+                1
+            );
+        }
+
+        return $select;
+    }
+
+    /**
+     * @param string $url_key
+     * @param int $isActive
+     * @return \Magento\Framework\DB\Select
+     * @throws LocalizedException
+     */
+    protected function _getLoadByUrlKeySelect($url_key, $isActive = null)
+    {
+        $select = $this->getConnection()->select()->from(
+            ['bp' => $this->getMainTable()]
+        )->where(
+            'bp.url_key = ?',
+            $url_key
+        );
+
+        if (!is_null($isActive)) {
+            $select->where('bp.is_active = ?', $isActive);
+        }
+
+        return $select;
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @return false|int
+     */
+    protected function isValidPostUrlKey(\Magento\Framework\Model\AbstractModel $object)
+    {
+        return preg_match('/^[a-z0-9][a-z0-9_\/-]+(\.[a-z0-9_-]+)?$/', $object->getData('url_key'));
+    }
+
+    /**
+     * @param \Magento\Framework\Model\AbstractModel $object
+     * @return false|int
+     */
+    protected function isNumericPostUrlKey(\Magento\Framework\Model\AbstractModel $object)
+    {
+        return preg_match('/^[0-9]+$/', $object->getData('url_key'));
+    }
+
+    /**
+     * @param $url_key
+     * @return int
+     * @throws LocalizedException
+     */
+    public function checkUrlKey($url_key)
+    {
+        $select = $this->_getLoadByUrlKeySelect($url_key, 1);
+        $select->reset(\Zend_Db_Select::COLUMNS)->columns('bp.post_id')->limit(1);
+
+        return $this->getConnection()->fetchOne($select);
+
+    }
+}
+
+```
+
+最后，我们需要资源模型集合，主要用来过滤模型和获取模型集合 `Model/ResourceModel/Post/Collection.php`。
+
+```
+<?php
+namespace Tutorial\Blog\Model\ResourceModel\Post;
+class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
+{
+    protected $_idFieldName = 'post_id';
+
+    protected function _construct()
+    {
+        $this->_init('Tutorial\Blog\Model\Post', 'Tutorial\Blog\Model\ResourceModel\Post');
+    }
+}
+```
+
+
+
 ### 设置数据库和迁移
 
 ### 后台控制器、块、用户界面、布局和试图
