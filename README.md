@@ -605,9 +605,104 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
 }
 ```
 
-
-
 ### 设置数据库和迁移
+
+前面已经创建了模型和资源模型，以便我们和数据库进行交互。但是我们还没有创建数据库表，这一部分将解决这个问题。
+还记得`etc/module.xml`中`setup_version`吗？这个是告诉我们当前模块的版本，并决定是否需要运行升级和设置脚本。
+让我们创建Stup类来安装我们的数据库吧！
+创建`Setup/InstallSchema.php`文件
+
+```
+<?php
+namespace Tutorial\Blog\Setup;
+class InstallSchema implements \Magento\Framework\Setup\InstallSchemaInterface
+{
+    public function install(
+        \Magento\Framework\Setup\SchemaSetupInterface $setup,
+        \Magento\Framework\Setup\ModuleContextInterface $context
+    )
+    {
+        $installer = $setup;
+        $installer->startSetup();
+
+        //START table setup
+        $table = $installer->getConnection()->newTable(
+            $installer->getTable('tutorial_blog_post')
+        )->addColumn(
+            'post_id',
+            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            null,
+            [ 'identity' => true, 'nullable' => false, 'primary' => true, 'unsigned' => true, ],
+            'Post ID'
+        )->addColumn(
+            'url_key',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            100,
+            [ 'nullable' => true, 'default' => null ],
+            'Url Key'
+        )->addColumn(
+            'title',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            255,
+            [ 'nullable' => false, ],
+            'Blog Title'
+        )->addColumn(
+            'content',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            '2M',
+            [],
+            'Blog Content'
+        )->addColumn(
+            'created_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+            null,
+            [ 'nullable' => false, 'default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT, ],
+            'Creation Time'
+        )->addColumn(
+            'updated_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+            null,
+            [ 'nullable' => false, 'default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT_UPDATE, ],
+            'Modification Time'
+        )->addColumn(
+            'published_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+            null,
+            [ 'nullable' => false, 'default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT_UPDATE, ],
+            'Published Time'
+        )->addColumn(
+            'is_active',
+            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            null,
+            [ 'nullable' => false, 'default' => '1', ],
+            'Is Post Active'
+        )->addIndex(
+            $installer->getIdxName('blog_post', ['url_key']), ['url_key']
+        )->setComment('Tutorial Blog Posts');
+        $installer->getConnection()->createTable($table);
+        //END   table setup
+$installer->endSetup();
+    }
+}
+```
+这个类的名称可以自定，只要实现`Magento\Framework\Setup\InstallSchemaInterface`这个接口就可以了；如果要升级版本怎么办？和你想的一样简单实现`Magento\Framework\Setup\UpgradeSchemaInterface`即可。
+
+如果你在升级之前检查当前模块的版本，[了解更多有关升级问题可以查看stackoverflow上面的这篇文档](https://magento.stackexchange.com/questions/79201/how-do-you-control-ordering-of-upgrade-setup-scripts-in-magento-2)。
+
+现在前往CLI并运行`bin/magento`命令来检查我们安装的数据库表。
+
+当你运行命令并看到如下内容时：
+
+```
+ $ bin/magento setup:db-schema:upgrade
+    Schema creation/updates:
+    Module 'Tutorial_Blog':
+    Installing schema..
+```
+
+这就表明Schema Setup安装成功了。
+
+### 前端控制器、块、布局和试图
 
 ### 后台控制器、块、用户界面、布局和试图
 
