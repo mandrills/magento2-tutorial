@@ -76,18 +76,6 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
         );
 
         $fieldset->addField(
-            'url_key',
-            'text',
-            [
-                'name' => 'url_key',
-                'label' => __('URL Key'),
-                'title' => __('URL Key'),
-                'required' => true,
-                'class' => 'validate-xml-identifier'
-            ]
-        );
-
-        $fieldset->addField(
             'is_active',
             'select',
             [
@@ -111,17 +99,6 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
                 'title' => __('Content'),
                 'style' => 'height:36em',
                 'required' => true
-            ]
-        );
-
-        $fieldset->addField(
-            'published_at',
-            'date',
-            [
-                'name' => 'published_at',
-                'label' => __('Published At'),
-                'date_format' => 'yyyy-MM-dd',
-                'time_format' => 'hh:mm:ss'
             ]
         );
 

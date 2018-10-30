@@ -29,16 +29,6 @@ class Post extends \Magento\Framework\Model\AbstractModel implements PostInterfa
     }
 
     /**
-     * @param string $url_key
-     * @return boolean
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function checkUrlKey($url_key)
-    {
-        return $this->_getResource()->checkUrlKey($url_key);
-    }
-
-    /**
      * @return array
      */
     public function getAvailableStatuses()
@@ -55,14 +45,6 @@ class Post extends \Magento\Framework\Model\AbstractModel implements PostInterfa
     public function getId()
     {
         return $this->getData(self::POST_ID);
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrlKey()
-    {
-        return $this->getData(self::URL_KEY);
     }
 
     /**
@@ -98,14 +80,6 @@ class Post extends \Magento\Framework\Model\AbstractModel implements PostInterfa
     }
 
     /**
-     * @return null|string
-     */
-    public function getPublishedAt()
-    {
-        return $this->getData(self::PUBLISHED_AT);
-    }
-
-    /**
      * @return bool|null
      */
     public function isActive()
@@ -120,15 +94,6 @@ class Post extends \Magento\Framework\Model\AbstractModel implements PostInterfa
     public function setId($id)
     {
         return $this->setData(self::POST_ID, $id);
-    }
-
-    /**
-     * @param string $url_key
-     * @return PostInterface|Post
-     */
-    public function setUrlKey($url_key)
-    {
-        return $this->setData(self::URL_KEY, $url_key);
     }
 
     /**
@@ -165,15 +130,6 @@ class Post extends \Magento\Framework\Model\AbstractModel implements PostInterfa
     public function setUpdatedAt($updated_at)
     {
         return $this->setData(self::UPDATED_AT, $updated_at);
-    }
-
-    /**
-     * @param string $published_at
-     * @return PostInterface|Post
-     */
-    public function setPublishedAt($published_at)
-    {
-        return $this->setData(self::PUBLISHED_AT, $published_at);
     }
 
     /**
