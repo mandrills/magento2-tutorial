@@ -49,8 +49,8 @@ Magento PHP 开发者需要快速学习如何在平台上构建我们的客户�
     ],
     "authors": [
         {
-            "name": "Andy D Xing",
-            "email": "andydxing@objectivasoftware.com"
+            "name": "Andy",
+            "email": ""
         }
     ],
     "require": {
